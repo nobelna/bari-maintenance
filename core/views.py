@@ -4,6 +4,7 @@ import io
 from decimal import Decimal, InvalidOperation
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -68,6 +69,7 @@ def _nav_context(month_date: datetime.date) -> dict:
 
 # ─── dashboard ──────────────────────────────────────────────────────────────
 
+@login_required
 def dashboard(request):
     month_date = _month_from_request(request)
     summary = _month_summary(month_date)
@@ -97,6 +99,7 @@ def dashboard(request):
 
 # ─── rental income ───────────────────────────────────────────────────────────
 
+@login_required
 def rental_income(request):
     month_date = _month_from_request(request)
     units = Unit.objects.filter(is_active=True)
@@ -117,6 +120,7 @@ def rental_income(request):
     return render(request, 'core/rental_income.html', ctx)
 
 
+@login_required
 def rental_income_save(request):
     if request.method != 'POST':
         return redirect('rental_income')
@@ -149,6 +153,7 @@ def rental_income_save(request):
 
 # ─── expenses ────────────────────────────────────────────────────────────────
 
+@login_required
 def expenses(request):
     month_date = _month_from_request(request)
     categories = ExpenseCategory.objects.all()
@@ -169,6 +174,7 @@ def expenses(request):
     return render(request, 'core/expenses.html', ctx)
 
 
+@login_required
 def expenses_save(request):
     if request.method != 'POST':
         return redirect('expenses')
@@ -202,6 +208,7 @@ def expenses_save(request):
 
 # ─── distribution ────────────────────────────────────────────────────────────
 
+@login_required
 def distribution(request):
     month_date = _month_from_request(request)
     summary = _month_summary(month_date)
@@ -242,6 +249,7 @@ def distribution(request):
     return render(request, 'core/distribution.html', ctx)
 
 
+@login_required
 def distribution_save(request):
     if request.method != 'POST':
         return redirect('distribution')
@@ -277,6 +285,7 @@ def distribution_save(request):
 
 # ─── deductions ──────────────────────────────────────────────────────────────
 
+@login_required
 def deduction_add(request):
     month_date = _month_from_request(request)
 
@@ -299,6 +308,7 @@ def deduction_add(request):
     })
 
 
+@login_required
 def deduction_delete(request, pk):
     ded = get_object_or_404(OwnerDeduction, pk=pk)
     month = ded.month
@@ -310,11 +320,13 @@ def deduction_delete(request, pk):
 
 # ─── units ───────────────────────────────────────────────────────────────────
 
+@login_required
 def units(request):
     units_qs = Unit.objects.all()
     return render(request, 'core/units.html', {'units': units_qs})
 
 
+@login_required
 def unit_create(request):
     if request.method == 'POST':
         form = UnitForm(request.POST)
@@ -327,6 +339,7 @@ def unit_create(request):
     return render(request, 'core/unit_form.html', {'form': form, 'title': 'Add Unit'})
 
 
+@login_required
 def unit_edit(request, pk):
     unit = get_object_or_404(Unit, pk=pk)
     if request.method == 'POST':
@@ -472,12 +485,14 @@ def _build_report_context(month_date):
 
 # ─── report views ─────────────────────────────────────────────────────────────
 
+@login_required
 def report(request):
     month_date = _month_from_request(request)
     ctx = _build_report_context(month_date)
     return render(request, 'core/report.html', ctx)
 
 
+@login_required
 def report_xlsx(request):
     """Generate and download a formatted Excel report matching the original spreadsheet."""
     import openpyxl
