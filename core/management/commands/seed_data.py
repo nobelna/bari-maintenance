@@ -81,9 +81,6 @@ APRIL_DEDUCTIONS = {
         ('Bua (Maid)',   1000),
         ('Dish Bill',    1700),
     ],
-    'Mohammad Moshiur Rahman': [
-        ('Other',  550),   # net was 35,300 in the Excel (gross 35,850 - 550)
-    ],
 }
 
 
