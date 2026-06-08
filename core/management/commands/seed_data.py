@@ -73,13 +73,18 @@ OWNERS = [
     ('Naimul Islam Nobel',      False, 4),
 ]
 
-# April 2026 deductions for resident owner (Md Nishadul Islam)
-APRIL_DEDUCTIONS = [
-    ('House Rent',   17000),
-    ('Electricity',   1150),
-    ('Bua (Maid)',    1000),
-    ('Dish Bill',     1700),
-]
+# April 2026 deductions per owner  {owner_name: [(description, amount), ...]}
+APRIL_DEDUCTIONS = {
+    'Md Nishadul Islam': [
+        ('House Rent',  17000),
+        ('Electricity',  1150),
+        ('Bua (Maid)',   1000),
+        ('Dish Bill',    1700),
+    ],
+    'Mohammad Moshiur Rahman': [
+        ('Other',  550),   # net was 35,300 in the Excel (gross 35,850 - 550)
+    ],
+}
 
 
 class Command(BaseCommand):
@@ -156,16 +161,17 @@ class Command(BaseCommand):
             )
             self.stdout.write(f'  ৳{amount:,} → {cat.name}')
 
-        # ── April 2026 deductions for resident owner ──────────────────────────
-        resident = next((o for o in owner_objs if o.is_resident), None)
-        if resident:
-            self.stdout.write(f'Seeding deductions for {resident.name}…')
-            for desc, amount in APRIL_DEDUCTIONS:
-                OwnerDeduction.objects.update_or_create(
-                    owner=resident, month=APRIL_2026, description=desc,
-                    defaults={'amount': Decimal(amount)},
-                )
-                self.stdout.write(f'  – {desc}: ৳{amount:,}')
+        # ── April 2026 deductions per owner ──────────────────────────────────
+        for owner in owner_objs:
+            owner_deds = APRIL_DEDUCTIONS.get(owner.name, [])
+            if owner_deds:
+                self.stdout.write(f'Seeding deductions for {owner.name}…')
+                for desc, amount in owner_deds:
+                    OwnerDeduction.objects.update_or_create(
+                        owner=owner, month=APRIL_2026, description=desc,
+                        defaults={'amount': Decimal(amount)},
+                    )
+                    self.stdout.write(f'  – {desc}: ৳{amount:,}')
 
         # ── Superuser ────────────────────────────────────────────────────────
         User = get_user_model()
