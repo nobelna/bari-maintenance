@@ -184,7 +184,7 @@ body {
 
 /* ── Page Layout ──────────────────────────────────────────── */
 .page-wrapper {
-  margin-left: var(--sidebar-w);
+  margin-left: 0;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -750,8 +750,18 @@ body {
   padding: 4px 8px;
 }
 
+/* Show sidebar on large screens only (>= 1280px) */
+@media (min-width: 1280px) {
+  .page-wrapper {
+    margin-left: var(--sidebar-w);
+  }
+  .menu-toggle {
+    display: none !important;
+  }
+}
+
 /* ── Tablet & Mobile (< 1024px) ───────────────────────────── */
-@media (max-width: 1023px) {
+@media (max-width: 1279px) {
   /* Sidebar: slide off-screen, toggled by JS */
   .sidebar {
     transform: translateX(-100%);
@@ -865,6 +875,28 @@ body {
   .btn-ghost {
     font-size: 12px;
     padding: 7px 12px;
+  }
+}
+
+/* ── Tablet portrait & small landscape (640–1279px) ─────── */
+@media (min-width: 640px) and (max-width: 1279px) {
+  /* 2-column stat grid on tablets */
+  .row.g-3 > .col-6.col-lg-3 {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+  /* 3-panel dashboard: stack to 1 column */
+  .row.g-3 > .col-lg-4 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  /* 3-stat distribution: 3 across still works at 640+ */
+  .row.g-3 > .col-12.col-sm-4 {
+    flex: 0 0 33.333%;
+    max-width: 33.333%;
+  }
+  .page-content {
+    padding: 20px 20px;
   }
 }
 
