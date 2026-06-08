@@ -1,0 +1,85 @@
+/* ── Bari Maintenance – custom styles ── */
+
+:root {
+  --bs-body-font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* Icon circles for dashboard cards */
+.icon-circle {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Nav active highlight */
+.navbar .nav-link.active {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* Table tweaks */
+.table > :not(caption) > * > * {
+  vertical-align: middle;
+}
+
+/* Card header consistent height */
+.card-header {
+  padding: 0.75rem 1rem;
+}
+
+/* Tighter input groups */
+.input-group-sm .form-control {
+  font-size: 0.9rem;
+}
+
+/* Print-friendly totals */
+tfoot td {
+  font-size: 1rem;
+}
+
+/* Collapse transition */
+.collapse {
+  transition: none;
+}
+
+/* ── Print / PDF styles ── */
+@media print {
+  body {
+    background: #fff !important;
+    font-size: 11pt;
+  }
+  .navbar,
+  .d-print-none,
+  footer {
+    display: none !important;
+  }
+  .d-none.d-print-block {
+    display: block !important;
+  }
+  .container-xl {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  .card {
+    border: 1px solid #dee2e6 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+  }
+  .card-header {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .table {
+    font-size: 10pt;
+  }
+  .report-table th,
+  .report-table td {
+    padding: 4px 8px !important;
+  }
+  .report-card {
+    margin-bottom: 16pt !important;
+  }
+}

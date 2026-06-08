@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – {{ month_date|date:"F Y" }}{% endblock %}
+{% block nav_dashboard %}active bg-secondary{% endblock %}
+
+{% block month_nav %}
+<div class="bg-white border-bottom shadow-sm py-2">
+  <div class="container-xl d-flex align-items-center justify-content-between gap-2 flex-wrap">
+    <a href="?year={{ prev_month.year }}&month={{ prev_month.month }}"
+       class="btn btn-sm btn-outline-secondary">
+      <i class="fas fa-chevron-left"></i> {{ prev_month|date:"M Y" }}
+    </a>
+    <h5 class="mb-0 fw-bold text-dark">
+      <i class="fas fa-calendar-days me-2 text-warning"></i>{{ month_date|date:"F Y" }}
+    </h5>
+    <a href="?year={{ next_month.year }}&month={{ next_month.month }}"
+       class="btn btn-sm btn-outline-secondary">
+      {{ next_month|date:"M Y" }} <i class="fas fa-chevron-right"></i>
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+
+<!-- Quick-month pills -->
+<div class="d-flex gap-2 flex-wrap mb-4">
+  {% for m in recent_months %}
+    <a href="?year={{ m.year }}&month={{ m.month }}"
+       class="btn btn-sm {% if m == month_date %}btn-warning text-dark fw-bold{% else %}btn-outline-secondary{% endif %}">
+      {{ m|date:"M Y" }}
+    </a>
+  {% endfor %}
+</div>
+
+<!-- Summary cards -->
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="icon-circle bg-success-subtle text-success">
+          <i class="fas fa-money-bill-wave fa-lg"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Total Rental Income</div>
+          <div class="fs-4 fw-bold">৳{{ total_income|floatformat:0 }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="icon-circle bg-danger-subtle text-danger">
+          <i class="fas fa-receipt fa-lg"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Total Expenses</div>
+          <div class="fs-4 fw-bold">৳{{ total_expense|floatformat:0 }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="icon-circle bg-primary-subtle text-primary">
+          <i class="fas fa-scale-balanced fa-lg"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Net Amount</div>
+          <div class="fs-4 fw-bold">৳{{ net|floatformat:0 }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-3">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body d-flex align-items-center gap-3">
+        <div class="icon-circle bg-warning-subtle text-warning">
+          <i class="fas fa-user-group fa-lg"></i>
+        </div>
+        <div>
+          <div class="text-muted small">Per Person ({{ num_owners }} owners)</div>
+          <div class="fs-4 fw-bold">৳{{ per_person|floatformat:0 }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Three-column panels -->
+<div class="row g-3">
+
+  <!-- Rental income snapshot -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-money-bill-wave me-2"></i>Rental Income</span>
+        <a href="{% url 'rental_income' %}?year={{ month_date.year }}&month={{ month_date.month }}"
+           class="btn btn-sm btn-light">Edit</a>
+      </div>
+      <div class="card-body p-0">
+        {% if incomes %}
+          <table class="table table-sm table-hover mb-0">
+            <tbody>
+              {% for ri in incomes %}
+                <tr>
+                  <td class="ps-3">{{ ri.unit.name }}</td>
+                  <td class="text-end pe-3 fw-semibold">৳{{ ri.amount|floatformat:0 }}</td>
+                  <td class="pe-3">
+                    {% if ri.is_paid %}
+                      <span class="badge bg-success-subtle text-success">Paid</span>
+                    {% else %}
+                      <span class="badge bg-danger-subtle text-danger">Unpaid</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot class="table-light">
+              <tr>
+                <td class="ps-3 fw-bold">Total</td>
+                <td class="text-end pe-3 fw-bold">৳{{ total_income|floatformat:0 }}</td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        {% else %}
+          <div class="text-center text-muted py-4">
+            <i class="fas fa-inbox fa-2x mb-2"></i>
+            <p class="mb-0">No income recorded</p>
+            <a href="{% url 'rental_income' %}?year={{ month_date.year }}&month={{ month_date.month }}"
+               class="btn btn-sm btn-success mt-2">Record Income</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Expenses snapshot -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-receipt me-2"></i>Expenses</span>
+        <a href="{% url 'expenses' %}?year={{ month_date.year }}&month={{ month_date.month }}"
+           class="btn btn-sm btn-light">Edit</a>
+      </div>
+      <div class="card-body p-0">
+        {% if expenses %}
+          <table class="table table-sm table-hover mb-0">
+            <tbody>
+              {% for e in expenses %}
+                <tr>
+                  <td class="ps-3">{{ e.category.name }}</td>
+                  <td class="text-end pe-3 fw-semibold">৳{{ e.amount|floatformat:0 }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+            <tfoot class="table-light">
+              <tr>
+                <td class="ps-3 fw-bold">Total</td>
+                <td class="text-end pe-3 fw-bold">৳{{ total_expense|floatformat:0 }}</td>
+              </tr>
+            </tfoot>
+          </table>
+        {% else %}
+          <div class="text-center text-muted py-4">
+            <i class="fas fa-inbox fa-2x mb-2"></i>
+            <p class="mb-0">No expenses recorded</p>
+            <a href="{% url 'expenses' %}?year={{ month_date.year }}&month={{ month_date.month }}"
+               class="btn btn-sm btn-danger mt-2">Record Expenses</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Distribution snapshot -->
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <span><i class="fas fa-users me-2"></i>Distribution</span>
+        <a href="{% url 'distribution' %}?year={{ month_date.year }}&month={{ month_date.month }}"
+           class="btn btn-sm btn-light">View</a>
+      </div>
+      <div class="card-body p-0">
+        {% if distributions %}
+          <table class="table table-sm table-hover mb-0">
+            <tbody>
+              {% for d in distributions %}
+                <tr>
+                  <td class="ps-3">{{ d.owner.name }}</td>
+                  <td class="text-end pe-3 fw-semibold">৳{{ d.net_amount|floatformat:0 }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div class="text-center text-muted py-4">
+            <i class="fas fa-inbox fa-2x mb-2"></i>
+            <p class="mb-0">Distribution not recorded</p>
+            <a href="{% url 'distribution' %}?year={{ month_date.year }}&month={{ month_date.month }}"
+               class="btn btn-sm btn-primary mt-2">Calculate</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div><!-- /row -->
+{% endblock %}

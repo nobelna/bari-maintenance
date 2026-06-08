@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Rental Income – {{ month_date|date:"F Y" }}{% endblock %}
+{% block nav_income %}active bg-secondary{% endblock %}
+
+{% block month_nav %}
+<div class="bg-white border-bottom shadow-sm py-2">
+  <div class="container-xl d-flex align-items-center justify-content-between gap-2 flex-wrap">
+    <a href="?year={{ prev_month.year }}&month={{ prev_month.month }}"
+       class="btn btn-sm btn-outline-secondary">
+      <i class="fas fa-chevron-left"></i> {{ prev_month|date:"M Y" }}
+    </a>
+    <h5 class="mb-0 fw-bold text-dark">
+      <i class="fas fa-money-bill-wave me-2 text-success"></i>Rental Income – {{ month_date|date:"F Y" }}
+    </h5>
+    <a href="?year={{ next_month.year }}&month={{ next_month.month }}"
+       class="btn btn-sm btn-outline-secondary">
+      {{ next_month|date:"M Y" }} <i class="fas fa-chevron-right"></i>
+    </a>
+  </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<form method="post" action="{% url 'rental_income_save' %}">
+  {% csrf_token %}
+  <input type="hidden" name="month" value="{{ month_date|date:'Y-m-d' }}" />
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+      <span class="fw-semibold"><i class="fas fa-table me-2"></i>Monthly Rent — {{ month_date|date:"F Y" }}</span>
+      <span class="badge bg-white text-success fs-6">Total: ৳{{ total|floatformat:0 }}</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="ps-3" style="min-width:180px">Unit</th>
+            <th style="min-width:150px">Amount (৳)</th>
+            <th style="min-width:60px" class="text-center">Paid</th>
+            <th style="min-width:220px">Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+            <tr>
+              <td class="ps-3">
+                <span class="fw-semibold">{{ row.unit.name }}</span>
+                <span class="badge bg-secondary-subtle text-secondary ms-1 small">{{ row.unit.get_floor_display }}</span>
+              </td>
+              <td>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text">৳</span>
+                  <input type="number"
+                         name="amount_{{ row.unit.id }}"
+                         class="form-control"
+                         value="{% if row.income %}{{ row.income.amount|floatformat:0 }}{% endif %}"
+                         min="0" step="1"
+                         placeholder="0" />
+                </div>
+              </td>
+              <td class="text-center">
+                <input type="checkbox"
+                       name="paid_{{ row.unit.id }}"
+                       class="form-check-input"
+                       {% if row.income and row.income.is_paid %}checked{% elif not row.income %}checked{% endif %} />
+              </td>
+              <td>
+                <input type="text"
+                       name="notes_{{ row.unit.id }}"
+                       class="form-control form-control-sm"
+                       value="{% if row.income %}{{ row.income.notes }}{% endif %}"
+                       placeholder="Optional note…" />
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="4" class="text-center text-muted py-4">
+                No active units found. <a href="{% url 'unit_create' %}">Add a unit</a>.
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+        <tfoot class="table-success">
+          <tr>
+            <td class="ps-3 fw-bold">Total</td>
+            <td class="fw-bold fs-5">৳{{ total|floatformat:0 }}</td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div class="card-footer bg-white d-flex justify-content-end gap-2">
+      <a href="{% url 'dashboard' %}?year={{ month_date.year }}&month={{ month_date.month }}"
+         class="btn btn-outline-secondary">Cancel</a>
+      <button type="submit" class="btn btn-success">
+        <i class="fas fa-floppy-disk me-1"></i>Save Rental Income
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock %}
