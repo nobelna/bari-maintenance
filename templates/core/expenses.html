@@ -1,94 +1,75 @@
 {% extends "base.html" %}
 {% block title %}Expenses – {{ month_date|date:"F Y" }}{% endblock %}
-{% block nav_expenses %}active bg-secondary{% endblock %}
+{% block nav_expenses %}active{% endblock %}
+{% block page_title %}Expenses — {{ month_date|date:"F Y" }}{% endblock %}
 
 {% block month_nav %}
-<div class="bg-white border-bottom shadow-sm py-2">
-  <div class="container-xl d-flex align-items-center justify-content-between gap-2 flex-wrap">
-    <a href="?year={{ prev_month.year }}&month={{ prev_month.month }}"
-       class="btn btn-sm btn-outline-secondary">
-      <i class="fas fa-chevron-left"></i> {{ prev_month|date:"M Y" }}
-    </a>
-    <h5 class="mb-0 fw-bold text-dark">
-      <i class="fas fa-receipt me-2 text-danger"></i>Expenses – {{ month_date|date:"F Y" }}
-    </h5>
-    <a href="?year={{ next_month.year }}&month={{ next_month.month }}"
-       class="btn btn-sm btn-outline-secondary">
-      {{ next_month|date:"M Y" }} <i class="fas fa-chevron-right"></i>
-    </a>
+<div class="month-nav-strip d-print-none">
+  <a href="?year={{ prev_month.year }}&month={{ prev_month.month }}" class="btn-nav">
+    <i class="fas fa-chevron-left"></i> {{ prev_month|date:"M Y" }}
+  </a>
+  <div class="current-month">
+    <i class="fas fa-receipt" style="color:#f43f5e"></i>
+    {{ month_date|date:"F Y" }}
   </div>
+  <a href="?year={{ next_month.year }}&month={{ next_month.month }}" class="btn-nav">
+    {{ next_month|date:"M Y" }} <i class="fas fa-chevron-right"></i>
+  </a>
 </div>
 {% endblock %}
 
 {% block content %}
 <form method="post" action="{% url 'expenses_save' %}">
   {% csrf_token %}
-  <input type="hidden" name="month" value="{{ month_date|date:'Y-m-d' }}" />
-
-  <div class="card border-0 shadow-sm">
-    <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
-      <span class="fw-semibold"><i class="fas fa-receipt me-2"></i>Monthly Expenses — {{ month_date|date:"F Y" }}</span>
-      <span class="badge bg-white text-danger fs-6">Total: ৳{{ total|floatformat:0 }}</span>
+  <input type="hidden" name="month" value="{{ month_date|date:'Y-m-d' }}"/>
+  <div class="panel">
+    <div class="panel-header danger">
+      <div class="panel-header-title"><i class="fas fa-receipt"></i> Monthly Expenses — {{ month_date|date:"F Y" }}</div>
+      <span class="panel-header-badge">Total: &#2547;{{ total|floatformat:0 }}</span>
     </div>
-    <div class="table-responsive">
-      <table class="table table-hover align-middle mb-0">
-        <thead class="table-light">
+    <div style="overflow-x:auto;">
+      <table class="data-table">
+        <thead>
           <tr>
-            <th class="ps-3" style="min-width:220px">Category</th>
-            <th style="min-width:150px">Amount (৳)</th>
-            <th style="min-width:280px">Notes / Details</th>
+            <th style="min-width:200px">Category</th>
+            <th style="min-width:160px">Amount (&#2547;)</th>
+            <th style="min-width:280px">Notes</th>
           </tr>
         </thead>
         <tbody>
           {% for row in rows %}
-            <tr>
-              <td class="ps-3">
-                <span class="fw-semibold">{{ row.category.name }}</span>
-                {% if row.category.is_recurring %}
-                  <span class="badge bg-primary-subtle text-primary ms-1 small">Recurring</span>
-                {% endif %}
-              </td>
-              <td>
-                <div class="input-group input-group-sm">
-                  <span class="input-group-text">৳</span>
-                  <input type="number"
-                         name="amount_{{ row.category.id }}"
-                         class="form-control"
-                         value="{% if row.expense %}{{ row.expense.amount|floatformat:0 }}{% endif %}"
-                         min="0" step="1"
-                         placeholder="0" />
-                </div>
-              </td>
-              <td>
-                <input type="text"
-                       name="notes_{{ row.category.id }}"
-                       class="form-control form-control-sm"
-                       value="{% if row.expense %}{{ row.expense.notes }}{% endif %}"
-                       placeholder="Optional breakdown / note…" />
-              </td>
-            </tr>
+          <tr>
+            <td><span style="font-weight:600;">{{ row.category.name }}</span></td>
+            <td>
+              <div class="input-prefix">
+                <span class="prefix-label">&#2547;</span>
+                <input type="number" name="amount_{{ row.category.id }}"
+                       value="{% if row.expense %}{{ row.expense.amount|floatformat:0 }}{% endif %}"
+                       min="0" step="1" placeholder="0"/>
+              </div>
+            </td>
+            <td>
+              <input type="text" class="form-input" name="notes_{{ row.category.id }}"
+                     value="{% if row.expense %}{{ row.expense.notes }}{% endif %}"
+                     placeholder="Optional note…"/>
+            </td>
+          </tr>
           {% empty %}
-            <tr>
-              <td colspan="3" class="text-center text-muted py-4">
-                No expense categories found. Add them via the <a href="/admin/">admin</a>.
-              </td>
-            </tr>
+          <tr><td colspan="3"><div class="empty-state"><i class="fas fa-inbox"></i><p>No expense categories found.</p></div></td></tr>
           {% endfor %}
         </tbody>
-        <tfoot class="table-danger">
+        <tfoot>
           <tr>
-            <td class="ps-3 fw-bold">Total</td>
-            <td class="fw-bold fs-5">৳{{ total|floatformat:0 }}</td>
-            <td></td>
+            <td>Total</td>
+            <td colspan="2">&#2547;{{ total|floatformat:0 }}</td>
           </tr>
         </tfoot>
       </table>
     </div>
-    <div class="card-footer bg-white d-flex justify-content-end gap-2">
-      <a href="{% url 'dashboard' %}?year={{ month_date.year }}&month={{ month_date.month }}"
-         class="btn btn-outline-secondary">Cancel</a>
-      <button type="submit" class="btn btn-danger">
-        <i class="fas fa-floppy-disk me-1"></i>Save Expenses
+    <div class="panel-footer">
+      <a href="{% url 'dashboard' %}?year={{ month_date.year }}&month={{ month_date.month }}" class="btn-ghost">Cancel</a>
+      <button type="submit" class="btn-primary-solid" style="background:linear-gradient(135deg,#f43f5e,#e11d48);">
+        <i class="fas fa-floppy-disk"></i> Save Expenses
       </button>
     </div>
   </div>

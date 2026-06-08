@@ -1,109 +1,123 @@
 {% extends "base.html" %}
-{% block title %}Monthly Report - {{ month_date|date:"F Y" }}{% endblock %}
-{% block nav_report %}active bg-secondary{% endblock %}
+{% block title %}Monthly Report — {{ month_date|date:"F Y" }}{% endblock %}
+{% block nav_report %}active{% endblock %}
+{% block page_title %}Monthly Report — {{ month_date|date:"F Y" }}{% endblock %}
+
+{% block topbar_actions %}
+<div class="d-flex gap-2 d-print-none">
+  <a href="{% url 'report_xlsx' %}?year={{ month_date.year }}&month={{ month_date.month }}"
+     class="btn-success-solid" style="font-size:13px;padding:8px 16px;">
+    <i class="fas fa-file-excel"></i> Download XLSX
+  </a>
+  <button onclick="window.print()" class="btn-ghost" style="font-size:13px;padding:8px 16px;border-color:#e2e8f0;">
+    <i class="fas fa-file-pdf"></i> Save as PDF
+  </button>
+</div>
+{% endblock %}
 
 {% block month_nav %}
-<div class="bg-white border-bottom shadow-sm py-2 d-print-none">
-  <div class="container-xl d-flex align-items-center justify-content-between gap-2 flex-wrap">
-    <a href="?year={{ prev_month.year }}&month={{ prev_month.month }}" class="btn btn-sm btn-outline-secondary">
-      <i class="fas fa-chevron-left"></i> {{ prev_month|date:"M Y" }}
-    </a>
-    <h5 class="mb-0 fw-bold text-dark">
-      <i class="fas fa-file-lines me-2 text-info"></i>Monthly Report - {{ month_date|date:"F Y" }}
-    </h5>
-    <a href="?year={{ next_month.year }}&month={{ next_month.month }}" class="btn btn-sm btn-outline-secondary">
-      {{ next_month|date:"M Y" }} <i class="fas fa-chevron-right"></i>
-    </a>
+<div class="month-nav-strip d-print-none">
+  <a href="?year={{ prev_month.year }}&month={{ prev_month.month }}" class="btn-nav">
+    <i class="fas fa-chevron-left"></i> {{ prev_month|date:"M Y" }}
+  </a>
+  <div class="current-month">
+    <i class="fas fa-file-lines" style="color:#3b82f6"></i>
+    {{ month_date|date:"F Y" }}
   </div>
+  <a href="?year={{ next_month.year }}&month={{ next_month.month }}" class="btn-nav">
+    {{ next_month|date:"M Y" }} <i class="fas fa-chevron-right"></i>
+  </a>
 </div>
 {% endblock %}
 
 {% block content %}
 
-<!-- Action buttons (hidden on print) -->
-<div class="d-flex justify-content-between align-items-center mb-3 d-print-none">
-  <h4 class="mb-0 fw-bold text-dark">
-    <i class="fas fa-building me-2 text-secondary"></i>
-    Property Maintenance Report &mdash; {{ month_date|date:"F Y" }}
-  </h4>
-  <div class="d-flex gap-2">
-    <a href="{% url 'report_xlsx' %}?year={{ month_date.year }}&month={{ month_date.month }}"
-       class="btn btn-success">
-      <i class="fas fa-file-excel me-1"></i>Download XLSX
-    </a>
-    <button onclick="window.print()" class="btn btn-danger">
-      <i class="fas fa-file-pdf me-1"></i>Save as PDF
-    </button>
+<!-- Print header (only visible when printing) -->
+<div style="display:none;" class="print-header">
+  <h2 style="font-weight:700;margin-bottom:4px;">Bari Maintenance Report</h2>
+  <h4 style="color:#64748b;margin-bottom:16px;">{{ month_date|date:"F Y" }}</h4>
+  <hr/>
+</div>
+<style>@media print { .print-header { display:block !important; text-align:center; } }</style>
+
+<!-- Summary stat cards -->
+<div class="row g-3 mb-4 d-print-none">
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-icon success"><i class="fas fa-money-bill-wave"></i></div>
+      <div><div class="stat-label">Total Rental Income</div><div class="stat-value">&#2547;{{ total_income|floatformat:0 }}</div></div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-icon danger"><i class="fas fa-receipt"></i></div>
+      <div><div class="stat-label">Total Expenses</div><div class="stat-value">&#2547;{{ total_expense|floatformat:0 }}</div></div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-icon primary"><i class="fas fa-scale-balanced"></i></div>
+      <div><div class="stat-label">Net Distributable</div><div class="stat-value">&#2547;{{ net|floatformat:0 }}</div></div>
+    </div>
+  </div>
+  <div class="col-sm-3">
+    <div class="stat-card">
+      <div class="stat-icon warning"><i class="fas fa-user-group"></i></div>
+      <div><div class="stat-label">Per Person ({{ num_owners }})</div><div class="stat-value">&#2547;{{ per_person|floatformat:0 }}</div></div>
+    </div>
   </div>
 </div>
 
-<!-- ================================================================
-     PRINT HEADER (only visible on print)
-================================================================ -->
-<div class="d-none d-print-block text-center mb-3">
-  <h2 class="fw-bold mb-1">Bari Maintenance Report</h2>
-  <h4 class="text-muted">{{ month_date|date:"F Y" }}</h4>
-  <hr />
-</div>
-
-<!-- ================================================================
-     SECTION 1 — RENTAL INCOME
-================================================================ -->
-<div class="card border-0 shadow-sm mb-4 report-card">
-  <div class="card-header bg-success text-white py-2">
-    <strong><i class="fas fa-money-bill-wave me-2"></i>Monthly Rental Income &mdash; {{ month_date|date:"F Y" }}</strong>
+<!-- Section 1 – Rental Income -->
+<div class="panel mb-4">
+  <div class="panel-header success">
+    <div class="panel-header-title"><i class="fas fa-money-bill-wave"></i> Monthly Rental Income — {{ month_date|date:"F Y" }}</div>
   </div>
-  <div class="table-responsive">
-    <table class="table table-bordered table-sm align-middle mb-0 report-table">
-      <thead class="table-success">
+  <div style="overflow-x:auto;">
+    <table class="data-table report-table">
+      <thead>
         <tr>
           <th style="width:28%">Description</th>
-          <th style="width:12%" class="text-end">Amount (Tk)</th>
+          <th style="width:12%;text-align:right;">Amount (Tk)</th>
           <th style="width:28%">Description</th>
-          <th style="width:12%" class="text-end">Amount (Tk)</th>
-          <th style="width:12%" class="text-end">Subtotal (Tk)</th>
+          <th style="width:12%;text-align:right;">Amount (Tk)</th>
+          <th style="width:12%;text-align:right;">Subtotal (Tk)</th>
         </tr>
       </thead>
       <tbody>
         {% for row in income_rows %}
         <tr>
           <td>{{ row.left_name }}</td>
-          <td class="text-end">
-            {% if row.left_amount %}{{ row.left_amount|floatformat:0 }}{% else %}-{% endif %}
-          </td>
-          <td>{% if row.is_single %}-{% else %}{{ row.right_name }}{% endif %}</td>
-          <td class="text-end">
-            {% if row.is_single %}-{% elif row.right_amount %}{{ row.right_amount|floatformat:0 }}{% else %}0{% endif %}
-          </td>
-          <td class="text-end fw-semibold">{{ row.subtotal|floatformat:0 }}</td>
+          <td style="text-align:right;">{% if row.left_amount %}{{ row.left_amount|floatformat:0 }}{% else %}—{% endif %}</td>
+          <td>{% if row.is_single %}—{% else %}{{ row.right_name }}{% endif %}</td>
+          <td style="text-align:right;">{% if row.is_single %}—{% elif row.right_amount %}{{ row.right_amount|floatformat:0 }}{% else %}0{% endif %}</td>
+          <td style="text-align:right;font-weight:600;">{{ row.subtotal|floatformat:0 }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="text-center text-muted">No income recorded for this month.</td></tr>
+        <tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:32px;">No income recorded.</td></tr>
         {% endfor %}
       </tbody>
-      <tfoot class="table-success">
+      <tfoot>
         <tr>
-          <td colspan="4" class="fw-bold">Total (Taka)</td>
-          <td class="text-end fw-bold fs-6">{{ total_income|floatformat:0 }}</td>
+          <td colspan="4" style="font-weight:700;">Total (Taka)</td>
+          <td style="text-align:right;font-weight:700;font-size:15px;">{{ total_income|floatformat:0 }}</td>
         </tr>
       </tfoot>
     </table>
   </div>
 </div>
 
-<!-- ================================================================
-     SECTION 2 — MONTHLY EXPENSES
-================================================================ -->
-<div class="card border-0 shadow-sm mb-4 report-card">
-  <div class="card-header bg-danger text-white py-2">
-    <strong><i class="fas fa-receipt me-2"></i>Monthly Expense</strong>
+<!-- Section 2 – Expenses -->
+<div class="panel mb-4">
+  <div class="panel-header danger">
+    <div class="panel-header-title"><i class="fas fa-receipt"></i> Monthly Expense</div>
   </div>
-  <div class="table-responsive">
-    <table class="table table-bordered table-sm align-middle mb-0 report-table">
-      <thead class="table-danger">
+  <div style="overflow-x:auto;">
+    <table class="data-table report-table">
+      <thead>
         <tr>
           <th style="width:36%">Monthly Expense</th>
-          <th style="width:14%" class="text-end">Taka</th>
+          <th style="width:14%;text-align:right;">Taka</th>
           <th style="width:10%">Additional</th>
           <th>Comment</th>
         </tr>
@@ -112,130 +126,88 @@
         {% for exp in expenses %}
         <tr>
           <td>{{ exp.category.name }}</td>
-          <td class="text-end fw-semibold">{{ exp.amount|floatformat:0 }}</td>
+          <td style="text-align:right;font-weight:600;">{{ exp.amount|floatformat:0 }}</td>
           <td></td>
-          <td class="text-muted small">{{ exp.notes|default:"" }}</td>
+          <td style="color:#64748b;font-size:13px;">{{ exp.notes|default:"" }}</td>
         </tr>
         {% empty %}
-        <tr><td colspan="4" class="text-center text-muted">No expenses recorded for this month.</td></tr>
+        <tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:32px;">No expenses recorded.</td></tr>
         {% endfor %}
       </tbody>
-      <tfoot class="table-danger">
+      <tfoot>
         <tr>
-          <td class="fw-bold">Total (Taka)</td>
-          <td class="text-end fw-bold fs-6">{{ total_expense|floatformat:0 }}</td>
+          <td style="font-weight:700;">Total (Taka)</td>
+          <td style="text-align:right;font-weight:700;font-size:15px;">{{ total_expense|floatformat:0 }}</td>
           <td colspan="2"></td>
         </tr>
-        <tr class="table-light">
-          <td class="text-muted">Total Maintenance in Account deposit</td>
+        <tr>
+          <td style="color:#64748b;font-size:13px;">Total Maintenance in Account deposit</td>
           <td></td>
-          <td colspan="2" class="text-muted small">Joint Account</td>
+          <td colspan="2" style="color:#64748b;font-size:13px;">Joint Account</td>
         </tr>
-        <tr class="table-light">
-          <td class="text-muted">Total Outstanding Rent</td>
+        <tr>
+          <td style="color:#64748b;font-size:13px;">Total Outstanding Rent</td>
           <td></td>
-          <td colspan="2" class="text-muted small">Need to be recover</td>
+          <td colspan="2" style="color:#64748b;font-size:13px;">Need to be recover</td>
         </tr>
       </tfoot>
     </table>
   </div>
 </div>
 
-<!-- ================================================================
-     SECTION 3 — DISTRIBUTION
-================================================================ -->
-<div class="card border-0 shadow-sm mb-4 report-card">
-  <div class="card-header bg-primary text-white py-2">
-    <strong><i class="fas fa-users me-2"></i>Monthly Distribution &mdash; {{ month_date|date:"F Y" }}</strong>
+<!-- Section 3 – Distribution -->
+<div class="panel mb-4">
+  <div class="panel-header primary">
+    <div class="panel-header-title"><i class="fas fa-users"></i> Monthly Distribution — {{ month_date|date:"F Y" }}</div>
   </div>
-  <div class="table-responsive">
-    <table class="table table-bordered table-sm align-middle mb-0 report-table">
-      <thead class="table-primary">
+  <div style="overflow-x:auto;">
+    <table class="data-table report-table">
+      <thead>
         <tr>
           <th style="width:24%">Owner</th>
-          <th style="width:14%" class="text-end">Share (Taka)</th>
+          <th style="width:14%;text-align:right;">Share (Taka)</th>
           <th style="width:8%"></th>
           <th>Deductions</th>
-          <th style="width:14%" class="text-end">Net Amount</th>
+          <th style="width:14%;text-align:right;">Net Amount</th>
         </tr>
       </thead>
       <tbody>
-        <!-- Net after expense row -->
-        <tr class="table-light fw-semibold">
+        <tr style="background:#f1f5f9;font-weight:600;">
           <td>Total Rent after Expense</td>
-          <td class="text-end text-primary fw-bold">{{ net|floatformat:0 }}</td>
-          <td class="text-muted small">(Taka)</td>
-          <td class="text-muted">Share per person ({{ num_owners }} owners)</td>
-          <td class="text-end fw-bold">{{ per_person|floatformat:0 }}</td>
+          <td style="text-align:right;color:#2563eb;font-weight:700;">{{ net|floatformat:0 }}</td>
+          <td style="color:#94a3b8;font-size:12px;">(Taka)</td>
+          <td style="color:#64748b;font-size:13px;">Share per person ({{ num_owners }} owners)</td>
+          <td style="text-align:right;font-weight:700;">{{ per_person|floatformat:0 }}</td>
         </tr>
         {% for row in dist_rows %}
         <tr>
-          <td class="fw-semibold">
-            {{ row.owner.name }}
-          </td>
-          <td class="text-end">{{ row.gross|floatformat:0 }}</td>
-          <td class="text-muted small">(Taka)</td>
-          <td class="small text-muted">
+          <td style="font-weight:600;">{{ row.owner.name }}</td>
+          <td style="text-align:right;">{{ row.gross|floatformat:0 }}</td>
+          <td style="color:#94a3b8;font-size:12px;">(Taka)</td>
+          <td style="font-size:13px;color:#64748b;">
             {% for d in row.deductions %}{{ d.description }}-{{ d.amount|floatformat:0 }}{% if not forloop.last %}, {% endif %}{% endfor %}
             {% if row.total_deductions %} = Total {{ row.total_deductions|floatformat:0 }}{% endif %}
           </td>
-          <td class="text-end fw-bold {% if row.net < 0 %}text-danger{% else %}text-success{% endif %}">
+          <td style="text-align:right;font-weight:700;{% if row.net < 0 %}color:#ef4444{% else %}color:#059669{% endif %};">
             {{ row.net|floatformat:0 }}
           </td>
         </tr>
         {% empty %}
-        <tr><td colspan="5" class="text-center text-muted">No owners configured.</td></tr>
+        <tr><td colspan="5" style="text-align:center;color:#94a3b8;padding:32px;">No owners configured.</td></tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
 
-<!-- ================================================================
-     SUMMARY BOX
-================================================================ -->
-<div class="card border-0 shadow-sm report-card">
-  <div class="card-header bg-dark text-white py-2">
-    <strong><i class="fas fa-calculator me-2"></i>Summary</strong>
-  </div>
-  <div class="card-body">
-    <div class="row g-3 text-center">
-      <div class="col-sm-3">
-        <div class="border rounded p-3 bg-success-subtle">
-          <div class="text-muted small mb-1">Total Rental Income</div>
-          <div class="fs-5 fw-bold text-success">&#2547;{{ total_income|floatformat:0 }}</div>
-        </div>
-      </div>
-      <div class="col-sm-3">
-        <div class="border rounded p-3 bg-danger-subtle">
-          <div class="text-muted small mb-1">Total Expenses</div>
-          <div class="fs-5 fw-bold text-danger">&#2547;{{ total_expense|floatformat:0 }}</div>
-        </div>
-      </div>
-      <div class="col-sm-3">
-        <div class="border rounded p-3 bg-primary-subtle">
-          <div class="text-muted small mb-1">Net Distributable</div>
-          <div class="fs-5 fw-bold text-primary">&#2547;{{ net|floatformat:0 }}</div>
-        </div>
-      </div>
-      <div class="col-sm-3">
-        <div class="border rounded p-3 bg-warning-subtle">
-          <div class="text-muted small mb-1">Per Person ({{ num_owners }} owners)</div>
-          <div class="fs-5 fw-bold text-warning">&#2547;{{ per_person|floatformat:0 }}</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Bottom buttons (hidden on print) -->
-<div class="d-flex justify-content-end gap-2 mt-3 d-print-none">
-  <a href="{% url 'report_xlsx' %}?year={{ month_date.year }}&month={{ month_date.month }}" class="btn btn-success">
-    <i class="fas fa-file-excel me-1"></i>Download XLSX
+<!-- Bottom buttons -->
+<div class="d-flex justify-content-end gap-2 d-print-none">
+  <a href="{% url 'report_xlsx' %}?year={{ month_date.year }}&month={{ month_date.month }}"
+     class="btn-success-solid" style="font-size:13px;padding:8px 16px;">
+    <i class="fas fa-file-excel"></i> Download XLSX
   </a>
-  <button onclick="window.print()" class="btn btn-danger">
-    <i class="fas fa-file-pdf me-1"></i>Save as PDF
+  <button onclick="window.print()" class="btn-ghost" style="font-size:13px;padding:8px 16px;">
+    <i class="fas fa-file-pdf"></i> Save as PDF
   </button>
 </div>
-
 {% endblock %}
