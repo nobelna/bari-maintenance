@@ -165,7 +165,7 @@
           <td>Total Rent after Expense</td>
           <td class="text-end text-primary fw-bold">{{ net|floatformat:0 }}</td>
           <td class="text-muted small">(Taka)</td>
-          <td class="text-muted">Expense per person</td>
+          <td class="text-muted">Share per person ({{ num_owners }} owners)</td>
           <td class="text-end fw-bold">{{ per_person|floatformat:0 }}</td>
         </tr>
         {% for row in dist_rows %}
