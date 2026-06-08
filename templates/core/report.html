@@ -172,7 +172,6 @@
         <tr>
           <td class="fw-semibold">
             {{ row.owner.name }}
-            {% if row.owner.is_resident %}<span class="badge bg-warning-subtle text-warning ms-1 small">Resident</span>{% endif %}
           </td>
           <td class="text-end">{{ row.gross|floatformat:0 }}</td>
           <td class="text-muted small">(Taka)</td>

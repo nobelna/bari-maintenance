@@ -64,7 +64,6 @@
           <tr>
             <td class="ps-3">
               <span class="fw-semibold">{{ row.owner.name }}</span>
-              {% if row.owner.is_resident %}<span class="badge bg-warning-subtle text-warning ms-1">Resident</span>{% endif %}
               {% if row.saved %}<span class="badge bg-success-subtle text-success ms-1"><i class="fas fa-check"></i> Saved</span>{% endif %}
             </td>
             <td class="text-end">&#2547;{{ row.gross|floatformat:0 }}</td>
