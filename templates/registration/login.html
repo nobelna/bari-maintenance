@@ -9,43 +9,145 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Inter',system-ui,sans-serif;min-height:100vh;display:flex;background:#f1f5f9;}
-    .login-left{flex:1;background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 50%,#1d4ed8 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;padding:48px;color:#fff;}
-    .login-left .logo{width:64px;height:64px;background:rgba(255,255,255,.15);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:28px;backdrop-filter:blur(8px);}
-    .login-left h1{font-size:32px;font-weight:700;margin-bottom:12px;text-align:center;}
-    .login-left p{font-size:15px;color:rgba(255,255,255,.7);text-align:center;max-width:320px;line-height:1.6;}
-    .login-left .feature{display:flex;align-items:center;gap:12px;margin-top:18px;background:rgba(255,255,255,.08);border-radius:10px;padding:14px 18px;width:100%;max-width:340px;}
-    .login-left .feature i{color:#60a5fa;font-size:18px;width:20px;text-align:center;}
-    .login-left .feature span{font-size:13px;color:rgba(255,255,255,.85);}
-    .login-right{width:480px;display:flex;align-items:center;justify-content:center;padding:48px 40px;background:#fff;}
-    .login-box{width:100%;max-width:360px;}
-    .login-box h2{font-size:24px;font-weight:700;color:#0f172a;margin-bottom:6px;}
-    .login-box .subtitle{font-size:14px;color:#64748b;margin-bottom:32px;}
-    .field{margin-bottom:18px;}
-    .field label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;}
-    .field .input-wrap{position:relative;}
-    .field .input-wrap i{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:#94a3b8;font-size:14px;}
-    .field input{width:100%;border:1.5px solid #e2e8f0;border-radius:10px;padding:11px 14px 11px 38px;font-size:14px;font-family:inherit;transition:border-color .18s,box-shadow .18s;color:#1e293b;background:#fff;}
-    .field input:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12);}
-    .btn-login{width:100%;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .18s,transform .18s;font-family:inherit;margin-top:6px;}
-    .btn-login:hover{opacity:.92;transform:translateY(-1px);}
-    .error-box{background:#fee2e2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;font-size:13px;color:#b91c1c;margin-bottom:18px;display:flex;align-items:center;gap:8px;}
-    @media(max-width:768px){.login-left{display:none;}.login-right{width:100%;padding:40px 24px;}}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-container {
+      display: flex;
+      width: 100%;
+      max-width: 900px;
+      min-height: 560px;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0,0,0,.4);
+    }
+
+    /* ── Left brand panel ── */
+    .login-left {
+      flex: 1;
+      background: rgba(255,255,255,.07);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,.12);
+      border-right: none;
+      border-radius: 20px 0 0 20px;
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      color: #fff;
+    }
+    .login-left .logo {
+      width: 60px; height: 60px;
+      background: rgba(255,255,255,.15);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+      margin-bottom: 24px;
+    }
+    .login-left h1 { font-size: 28px; font-weight: 700; margin-bottom: 10px; }
+    .login-left p  { font-size: 14px; color: rgba(255,255,255,.7); line-height: 1.7; margin-bottom: 32px; }
+    .feature {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px;
+      background: rgba(255,255,255,.08);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: rgba(255,255,255,.85);
+    }
+    .feature i { color: #60a5fa; font-size: 15px; width: 18px; text-align: center; }
+
+    /* ── Right form panel ── */
+    .login-right {
+      flex: 1;
+      background: #fff;
+      border-radius: 0 20px 20px 0;
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .login-right h2 { font-size: 26px; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+    .login-right .subtitle { font-size: 14px; color: #64748b; margin-bottom: 32px; }
+
+    .field { margin-bottom: 20px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+    .field .input-wrap { position: relative; }
+    .field .input-wrap i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 14px; }
+    .field input {
+      width: 100%;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 14px 12px 40px;
+      font-size: 14px;
+      font-family: inherit;
+      color: #1e293b;
+      background: #fff;
+      transition: border-color .18s, box-shadow .18s;
+    }
+    .field input:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,.12);
+    }
+    .btn-login {
+      width: 100%;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 4px;
+      transition: opacity .18s, transform .18s;
+    }
+    .btn-login:hover { opacity: .9; transform: translateY(-1px); }
+    .error-box {
+      background: #fee2e2; border: 1px solid #fecaca; border-radius: 10px;
+      padding: 12px 16px; font-size: 13px; color: #b91c1c;
+      margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 700px) {
+      .login-container { flex-direction: column; min-height: auto; border-radius: 16px; }
+      .login-left {
+        border-radius: 16px 16px 0 0;
+        border-right: 1px solid rgba(255,255,255,.12);
+        border-bottom: none;
+        padding: 32px 28px;
+      }
+      .login-left p, .feature { display: none; }
+      .login-right { border-radius: 0 0 16px 16px; padding: 32px 28px; }
+    }
   </style>
 </head>
 <body>
-<div class="login-left">
-  <div class="logo"><i class="fas fa-building"></i></div>
-  <h1>Bari Maintenance</h1>
-  <p>Manage rental income, expenses, and owner distributions all in one place.</p>
-  <div class="feature"><i class="fas fa-money-bill-wave"></i><span>Track monthly rental income per unit</span></div>
-  <div class="feature"><i class="fas fa-receipt"></i><span>Record and categorise all expenses</span></div>
-  <div class="feature"><i class="fas fa-users"></i><span>Calculate fair owner distributions</span></div>
-  <div class="feature"><i class="fas fa-file-lines"></i><span>Generate printable monthly reports</span></div>
-</div>
-<div class="login-right">
-  <div class="login-box">
+<div class="login-container">
+  <!-- Left: branding -->
+  <div class="login-left">
+    <div class="logo"><i class="fas fa-building"></i></div>
+    <h1>Bari Maintenance</h1>
+    <p>Your all-in-one property management system for tracking rental income, expenses, and owner distributions.</p>
+    <div class="feature"><i class="fas fa-money-bill-wave"></i> Track monthly rental income per unit</div>
+    <div class="feature"><i class="fas fa-receipt"></i> Record and categorise all expenses</div>
+    <div class="feature"><i class="fas fa-users"></i> Calculate fair owner distributions</div>
+    <div class="feature"><i class="fas fa-file-lines"></i> Generate printable monthly reports</div>
+  </div>
+
+  <!-- Right: login form -->
+  <div class="login-right">
     <h2>Welcome back</h2>
     <p class="subtitle">Sign in to your account to continue</p>
     {% if form.errors %}
