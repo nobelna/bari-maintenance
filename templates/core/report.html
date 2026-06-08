@@ -42,25 +42,25 @@
 
 <!-- Summary stat cards -->
 <div class="row g-3 mb-4 d-print-none">
-  <div class="col-sm-3">
+  <div class="col-6 col-lg-3">
     <div class="stat-card">
       <div class="stat-icon success"><i class="fas fa-money-bill-wave"></i></div>
       <div><div class="stat-label">Total Rental Income</div><div class="stat-value">&#2547;{{ total_income|floatformat:0 }}</div></div>
     </div>
   </div>
-  <div class="col-sm-3">
+  <div class="col-6 col-lg-3">
     <div class="stat-card">
       <div class="stat-icon danger"><i class="fas fa-receipt"></i></div>
       <div><div class="stat-label">Total Expenses</div><div class="stat-value">&#2547;{{ total_expense|floatformat:0 }}</div></div>
     </div>
   </div>
-  <div class="col-sm-3">
+  <div class="col-6 col-lg-3">
     <div class="stat-card">
       <div class="stat-icon primary"><i class="fas fa-scale-balanced"></i></div>
       <div><div class="stat-label">Net Distributable</div><div class="stat-value">&#2547;{{ net|floatformat:0 }}</div></div>
     </div>
   </div>
-  <div class="col-sm-3">
+  <div class="col-6 col-lg-3">
     <div class="stat-card">
       <div class="stat-icon warning"><i class="fas fa-user-group"></i></div>
       <div><div class="stat-label">Per Person ({{ num_owners }})</div><div class="stat-value">&#2547;{{ per_person|floatformat:0 }}</div></div>
@@ -73,7 +73,7 @@
   <div class="panel-header success">
     <div class="panel-header-title"><i class="fas fa-money-bill-wave"></i> Monthly Rental Income — {{ month_date|date:"F Y" }}</div>
   </div>
-  <div style="overflow-x:auto;">
+  <div class="table-scroll">
     <table class="data-table report-table">
       <thead>
         <tr>
@@ -112,7 +112,7 @@
   <div class="panel-header danger">
     <div class="panel-header-title"><i class="fas fa-receipt"></i> Monthly Expense</div>
   </div>
-  <div style="overflow-x:auto;">
+  <div class="table-scroll">
     <table class="data-table report-table">
       <thead>
         <tr>
@@ -160,7 +160,7 @@
   <div class="panel-header primary">
     <div class="panel-header-title"><i class="fas fa-users"></i> Monthly Distribution — {{ month_date|date:"F Y" }}</div>
   </div>
-  <div style="overflow-x:auto;">
+  <div class="table-scroll">
     <table class="data-table report-table">
       <thead>
         <tr>

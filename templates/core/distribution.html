@@ -28,7 +28,7 @@
 {% block content %}
 <!-- Summary stat cards -->
 <div class="row g-3 mb-4">
-  <div class="col-sm-4">
+  <div class="col-12 col-sm-4">
     <div class="stat-card">
       <div class="stat-icon success"><i class="fas fa-money-bill-wave"></i></div>
       <div>
@@ -37,7 +37,7 @@
       </div>
     </div>
   </div>
-  <div class="col-sm-4">
+  <div class="col-12 col-sm-4">
     <div class="stat-card">
       <div class="stat-icon danger"><i class="fas fa-receipt"></i></div>
       <div>
@@ -46,7 +46,7 @@
       </div>
     </div>
   </div>
-  <div class="col-sm-4">
+  <div class="col-12 col-sm-4">
     <div class="stat-card">
       <div class="stat-icon primary"><i class="fas fa-scale-balanced"></i></div>
       <div>
@@ -65,7 +65,7 @@
       <div class="panel-header-title"><i class="fas fa-users"></i> Owner Distribution — {{ month_date|date:"F Y" }}</div>
       <span class="panel-header-badge">Gross/person: &#2547;{{ per_person|floatformat:0 }}</span>
     </div>
-    <div style="overflow-x:auto;">
+    <div class="table-scroll">
       <table class="data-table">
         <thead>
           <tr>

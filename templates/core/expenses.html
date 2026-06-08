@@ -27,7 +27,7 @@
       <div class="panel-header-title"><i class="fas fa-receipt"></i> Monthly Expenses — {{ month_date|date:"F Y" }}</div>
       <span class="panel-header-badge">Total: &#2547;{{ total|floatformat:0 }}</span>
     </div>
-    <div style="overflow-x:auto;">
+    <div class="table-scroll">
       <table class="data-table">
         <thead>
           <tr>
