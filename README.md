@@ -27,11 +27,13 @@ python3 -m venv venv
 ```
 
 **Activate on Linux / macOS:**
+
 ```bash
 source venv/bin/activate
 ```
 
 **Activate on Windows:**
+
 ```bash
 venv\Scripts\activate
 ```
@@ -63,9 +65,9 @@ python manage.py seed_data
 ```
 
 **Default admin credentials created by seed:**
-| Username | Password  |
+| Username | Password |
 |----------|-----------|
-| admin    | admin1234 |
+| admin | admin1234 |
 
 ---
 
@@ -91,15 +93,15 @@ You will be redirected to the login page. Sign in with your credentials.
 
 ## Pages
 
-| URL | Description |
-|-----|-------------|
-| `/` | Dashboard — monthly summary |
-| `/rental-income/` | Enter/edit monthly rent per unit |
-| `/expenses/` | Enter/edit monthly expenses |
-| `/distribution/` | View owner distributions and deductions |
-| `/units/` | Manage property units |
-| `/report/` | Printable monthly report (PDF / XLSX download) |
-| `/admin/` | Django admin panel |
+| URL               | Description                                    |
+| ----------------- | ---------------------------------------------- |
+| `/`               | Dashboard — monthly summary                    |
+| `/rental-income/` | Enter/edit monthly rent per unit               |
+| `/expenses/`      | Enter/edit monthly expenses                    |
+| `/distribution/`  | View owner distributions and deductions        |
+| `/units/`         | Manage property units                          |
+| `/report/`        | Printable monthly report (PDF / XLSX download) |
+| `/admin/`         | Django admin panel                             |
 
 ---
 
