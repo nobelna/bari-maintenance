@@ -408,7 +408,7 @@ FLOOR_ORDER = ['7th_roof', '6th', '5th', '4th', '3rd', '2nd', '1st', 'garage']
 SINGLE_FLOORS = {'7th_roof', 'garage'}
 
 # Positions treated as "left" (first column) vs "right" (second column)
-LEFT_POSITIONS = {'front', 'side1', 'roof', 'full', 'partial', 'garage'}
+LEFT_POSITIONS = {'front', 'side1', 'roof', 'full', 'garage'}
 
 
 def _build_income_rows(month_date):
@@ -540,205 +540,221 @@ def report(request):
 
 
 @login_required
-def report_xlsx(request):
-    """Generate and download a formatted Excel report matching the original spreadsheet."""
+def report_xlsx(request):  # noqa: PLR0912,PLR0915
+    """Generate Excel report matching the original April_Property_House style."""
     import openpyxl
-    from openpyxl.styles import (
-        Alignment, Border, Font, PatternFill, Side,
-    )
-    from openpyxl.utils import get_column_letter
+    from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 
     month_date = _month_from_request(request)
     ctx = _build_report_context(month_date)
-    month_label = month_date.strftime('%B %Y')
+    month_label = month_date.strftime('%B, %Y')
 
     wb = openpyxl.Workbook()
 
-    # ── colour palette ──────────────────────────────────────────────────────
-    GREEN  = PatternFill('solid', fgColor='1E7E34')
-    RED    = PatternFill('solid', fgColor='C82333')
-    BLUE   = PatternFill('solid', fgColor='1055A0')
-    LGREY  = PatternFill('solid', fgColor='F2F2F2')
-    LGREEN = PatternFill('solid', fgColor='D4EDDA')
-    LRED   = PatternFill('solid', fgColor='F8D7DA')
-    LBLUE  = PatternFill('solid', fgColor='D0E4F7')
+    # colours from original file
+    STEEL = PatternFill('solid', fgColor='76A5AF')
+    LGREEN = PatternFill('solid', fgColor='B6D7A8')
+    LGREY = PatternFill('solid', fgColor='EFEFEF')
+    DIST_HD = PatternFill('solid', fgColor='A2C4C9')
+    GREEN_ROW = PatternFill('solid', fgColor='6AA84F')
+    RED_ROW = PatternFill('solid', fgColor='E06666')
 
-    WHITE_BOLD = Font(bold=True, color='FFFFFF')
-    BOLD       = Font(bold=True)
-    NORMAL     = Font()
+    BOLD = Font(bold=True)
+    NORM = Font()
+    TITLE = Font(bold=True, size=14)
+    HDR_FONT = Font(bold=True, size=12)
 
-    thin = Side(style='thin', color='BBBBBB')
-    BORDER = Border(left=thin, right=thin, top=thin, bottom=thin)
+    L = Alignment(horizontal='left', vertical='center', wrap_text=True)
+    R = Alignment(horizontal='right', vertical='center')
+    C = Alignment(horizontal='center', vertical='center')
 
-    CENTER = Alignment(horizontal='center', vertical='center', wrap_text=True)
-    RIGHT  = Alignment(horizontal='right', vertical='center')
-    LEFT_A = Alignment(horizontal='left', vertical='center', wrap_text=True)
+    def _bdr(left='thin'):
+        lside = Side(style='medium') if left == 'medium' else Side(style='thin')
+        t = Side(style='thin')
+        return Border(left=lside, right=t, top=t, bottom=t)
 
-    def hdr(ws, cell, value, fill, font=WHITE_BOLD, align=CENTER):
-        ws[cell] = value
-        ws[cell].fill = fill
-        ws[cell].font = font
-        ws[cell].alignment = align
-        ws[cell].border = BORDER
+    BM = _bdr('medium')
+    BT = _bdr('thin')
 
-    def cell(ws, c, value, bold=False, fill=None, align=LEFT_A, num_fmt=None):
-        ws[c] = value
-        ws[c].font = BOLD if bold else NORMAL
-        ws[c].alignment = align
-        ws[c].border = BORDER
+    def sc(ws, coord, value, font=None, fill=None, align=L, border=BT, fmt=None):
+        """Set cell properties."""
+        cell = ws[coord]
+        cell.value = value
+        cell.font = font or NORM
+        cell.alignment = align
+        cell.border = border
         if fill:
-            ws[c].fill = fill
-        if num_fmt:
-            ws[c].number_format = num_fmt
+            cell.fill = fill
+        if fmt:
+            cell.number_format = fmt
 
-    # ════════════════════════════════════════════════════════════════════════
-    # Sheet 1 – Rental Income
-    # ════════════════════════════════════════════════════════════════════════
+    # ── Sheet 1: Rental Income ───────────────────────────────────────────────
     ws1 = wb.active
     ws1.title = 'Rental Income'
     ws1.column_dimensions['A'].width = 26
-    ws1.column_dimensions['B'].width = 14
-    ws1.column_dimensions['C'].width = 26
-    ws1.column_dimensions['D'].width = 14
-    ws1.column_dimensions['E'].width = 14
+    ws1.column_dimensions['B'].width = 10.09
+    ws1.column_dimensions['C'].width = 24
+    ws1.column_dimensions['D'].width = 10
+    ws1.column_dimensions['E'].width = 11.73
 
-    # Title
-    ws1.merge_cells('A1:E1')
-    ws1['A1'] = f'Monthly Rental Income of {month_label}'
-    ws1['A1'].font = Font(bold=True, size=14)
-    ws1['A1'].alignment = CENTER
-    ws1['A1'].fill = GREEN
-    ws1['A1'].font = Font(bold=True, size=14, color='FFFFFF')
-    ws1.row_dimensions[1].height = 28
+    # Row 1: plain bold title, no fill, left-aligned
+    ws1['A1'].value = f'Monthly Rental Income of {month_label}'
+    ws1['A1'].font = TITLE
+    ws1['A1'].alignment = Alignment(horizontal='left', vertical='center', wrap_text=False)
+    ws1['A1'].fill = PatternFill(fill_type=None)
+    ws1.row_dimensions[1].height = 22
 
-    # Headers row 3
-    for col, label in [('A', 'Description'), ('B', 'Amount (Tk)'),
-                        ('C', 'Description'), ('D', 'Amount (Tk)'), ('E', 'Subtotal')]:
-        hdr(ws1, f'{col}3', label, GREEN)
-    ws1.row_dimensions[3].height = 20
+    # Row 2 blank, Row 3 steel-blue header
+    LNW = Alignment(horizontal='left', vertical='center', wrap_text=False)
+    for col, lbl in [('A', 'Description'), ('B', 'Amount'),
+                     ('C', 'Description'), ('D', 'Amount'), ('E', 'Subtotal')]:
+        bdr = BM if col == 'A' else BT
+        sc(ws1, f'{col}3', lbl, font=HDR_FONT, fill=STEEL, align=LNW, border=bdr)
+    ws1.row_dimensions[3].height = 15
 
-    row = 4
+    data_start = 4
+    irow = data_start
     for r in ctx['income_rows']:
-        cell(ws1, f'A{row}', r['left_name'])
-        cell(ws1, f'B{row}', float(r['left_amount']) if r['left_amount'] else '-', align=RIGHT, num_fmt='#,##0')
         if r['is_single']:
-            cell(ws1, f'C{row}', '-')
-            cell(ws1, f'D{row}', '-', align=RIGHT)
+            sc(ws1, f'A{irow}', r['left_name'], font=BOLD, border=BM)
+            sc(ws1, f'B{irow}', '-', align=R, border=BT)
+            sc(ws1, f'C{irow}', '-', font=BOLD, border=BT)
+            sc(ws1, f'D{irow}', float(r['left_amount']), align=R, border=BT, fmt='#,##0')
+            sc(ws1, f'E{irow}', float(r['left_amount']), align=R, border=BT, fmt='#,##0')
         else:
-            cell(ws1, f'C{row}', r['right_name'])
-            cell(ws1, f'D{row}', float(r['right_amount']) if r['right_amount'] else 0, align=RIGHT, num_fmt='#,##0')
-        cell(ws1, f'E{row}', float(r['subtotal']), align=RIGHT, num_fmt='#,##0')
-        ws1.row_dimensions[row].height = 18
-        row += 1
+            sc(ws1, f'A{irow}', r['left_name'], font=BOLD, border=BM)
+            sc(ws1, f'B{irow}', float(r['left_amount']), align=R, border=BT, fmt='#,##0')
+            sc(ws1, f'C{irow}', r['right_name'], font=BOLD, border=BT)
+            sc(ws1, f'D{irow}', float(r['right_amount']), align=R, border=BT, fmt='#,##0')
+            sc(ws1, f'E{irow}', f'=B{irow}+D{irow}', align=R, border=BT, fmt='#,##0')
+        ws1.row_dimensions[irow].height = 15
+        irow += 1
 
-    # Total row
-    for col in ['A', 'B', 'C', 'D', 'E']:
-        ws1[f'{col}{row}'].fill = LGREEN
-        ws1[f'{col}{row}'].border = BORDER
-    ws1[f'A{row}'] = 'Total (Taka)'
-    ws1[f'A{row}'].font = BOLD
-    ws1[f'E{row}'] = float(ctx['total_income'])
-    ws1[f'E{row}'].font = BOLD
-    ws1[f'E{row}'].alignment = RIGHT
-    ws1[f'E{row}'].number_format = '#,##0'
-    ws1.row_dimensions[row].height = 20
+    last_income = irow - 1
+    # Total row – light green
+    sc(ws1, f'A{irow}', 'Total (Taka)', font=BOLD, fill=LGREEN, border=BM)
+    for col in ['B', 'C', 'D']:
+        ws1[f'{col}{irow}'].fill = LGREEN
+        ws1[f'{col}{irow}'].border = BT
+    sc(ws1, f'E{irow}', f'=SUM(E{data_start}:E{last_income})',
+       font=BOLD, fill=LGREEN, align=R, border=BT, fmt='#,##0')
+    ws1.row_dimensions[irow].height = 15
+    income_total_ref = f"'Rental Income'!E{irow}"
 
-    # ════════════════════════════════════════════════════════════════════════
-    # Sheet 2 – Expense
-    # ════════════════════════════════════════════════════════════════════════
+    # ── Sheet 2: Expense ─────────────────────────────────────────────────────
     ws2 = wb.create_sheet('Expense')
-    ws2.column_dimensions['A'].width = 38
-    ws2.column_dimensions['B'].width = 14
-    ws2.column_dimensions['C'].width = 14
-    ws2.column_dimensions['D'].width = 50
+    ws2.column_dimensions['A'].width = 42.09
+    ws2.column_dimensions['B'].width = 13.0
+    ws2.column_dimensions['C'].width = 13.0
+    ws2.column_dimensions['D'].width = 63.91
 
-    ws2.merge_cells('A1:D1')
-    ws2['A1'] = f'Monthly Expense – {month_label}'
-    ws2['A1'].font = Font(bold=True, size=14, color='FFFFFF')
-    ws2['A1'].fill = RED
-    ws2['A1'].alignment = CENTER
-    ws2.row_dimensions[1].height = 28
+    # Row 1: steel-blue header — left aligned, no wrap (matches original)
+    LNW = Alignment(horizontal='left', vertical='center', wrap_text=False)
+    for col, lbl in [('A', 'Monthly Expense'), ('B', 'Taka'),
+                     ('C', 'Additional'), ('D', 'Comment')]:
+        bdr = BM if col == 'A' else BT
+        sc(ws2, f'{col}1', lbl, font=HDR_FONT, fill=STEEL, border=bdr, align=LNW)
+    ws2.row_dimensions[1].height = 15
 
-    for col, label in [('A', 'Monthly Expense'), ('B', 'Taka'),
-                        ('C', 'Additional'), ('D', 'Comment')]:
-        hdr(ws2, f'{col}2', label, RED)
-
-    erow = 3
-    for exp in ctx['expenses']:
-        cell(ws2, f'A{erow}', exp.category.name)
-        cell(ws2, f'B{erow}', float(exp.amount), align=RIGHT, num_fmt='#,##0')
-        cell(ws2, f'C{erow}', '')
-        cell(ws2, f'D{erow}', exp.notes or '')
-        ws2.row_dimensions[erow].height = 18
+    expenses_list = list(ctx['expenses'])
+    erow = 2
+    amount_refs = []
+    for i, exp in enumerate(expenses_list):
+        fill = LGREY if i % 2 == 1 else None
+        notes = exp.notes or ''
+        sc(ws2, f'A{erow}', exp.category.name, fill=fill, border=BM)
+        sc(ws2, f'B{erow}', float(exp.amount), fill=fill, align=R, border=BT, fmt='#,##0')
+        sc(ws2, f'C{erow}', '', fill=fill, border=BT)
+        sc(ws2, f'D{erow}', notes, fill=fill, border=BT,
+           align=Alignment(horizontal='left', vertical='top', wrap_text=True))
+        if notes:
+            ws2.row_dimensions[erow].height = 30
+        else:
+            ws2.row_dimensions[erow].height = 15
+        amount_refs.append(f'B{erow}')
         erow += 1
 
-    # Total
-    for col in ['A', 'B', 'C', 'D']:
-        ws2[f'{col}{erow}'].fill = LRED
-        ws2[f'{col}{erow}'].border = BORDER
-    ws2[f'A{erow}'] = 'Total (Taka)'
-    ws2[f'A{erow}'].font = BOLD
-    ws2[f'B{erow}'] = float(ctx['total_expense'])
-    ws2[f'B{erow}'].font = BOLD
-    ws2[f'B{erow}'].alignment = RIGHT
-    ws2[f'B{erow}'].number_format = '#,##0'
-    ws2.row_dimensions[erow].height = 20
+    # Total row – steel-blue like original
+    total_formula = '=' + '+'.join(amount_refs) if amount_refs else '=0'
+    sc(ws2, f'A{erow}', 'Total (Taka)', font=HDR_FONT, fill=STEEL, border=BM)
+    sc(ws2, f'B{erow}', total_formula, font=HDR_FONT, fill=STEEL, align=R, border=BT, fmt='#,##0')
+    for col in ['C', 'D']:
+        ws2[f'{col}{erow}'].fill = STEEL
+        ws2[f'{col}{erow}'].border = BT
+    ws2.row_dimensions[erow].height = 15
+    expense_total_ref = f'Expense!B{erow}'
+    erow += 2  # blank row gap
 
-    # ════════════════════════════════════════════════════════════════════════
-    # Sheet 3 – Distribution
-    # ════════════════════════════════════════════════════════════════════════
+    sc(ws2, f'A{erow}', 'Total Maintenance in Account deposit', fill=GREEN_ROW)
+    ws2[f'B{erow}'].fill = GREEN_ROW
+    ws2[f'C{erow}'].fill = GREEN_ROW
+    sc(ws2, f'D{erow}', 'Joint Account', fill=GREEN_ROW)
+    ws2.row_dimensions[erow].height = 15
+    erow += 1
+
+    sc(ws2, f'A{erow}', 'Total Outstanding Rent', fill=RED_ROW)
+    ws2[f'B{erow}'].fill = RED_ROW
+    ws2[f'C{erow}'].fill = RED_ROW
+    sc(ws2, f'D{erow}', 'Need to be recover', fill=RED_ROW)
+    ws2.row_dimensions[erow].height = 15
+
+    # ── Sheet 3: Distribution ────────────────────────────────────────────────
     ws3 = wb.create_sheet('Distribution')
-    ws3.column_dimensions['A'].width = 28
-    ws3.column_dimensions['B'].width = 16
-    ws3.column_dimensions['C'].width = 10
-    ws3.column_dimensions['D'].width = 42
-    ws3.column_dimensions['E'].width = 16
+    ws3.column_dimensions['A'].width = 45
+    ws3.column_dimensions['B'].width = 14.45
+    ws3.column_dimensions['C'].width = 7
+    ws3.column_dimensions['D'].width = 55
+    ws3.column_dimensions['E'].width = 12
 
-    ws3.merge_cells('A1:E1')
-    ws3['A1'] = f'Monthly Distribution of {month_label}'
-    ws3['A1'].font = Font(bold=True, size=14, color='FFFFFF')
-    ws3['A1'].fill = BLUE
-    ws3['A1'].alignment = CENTER
-    ws3.row_dimensions[1].height = 28
+    # Row 1: plain bold title, no fill
+    ws3['A1'].value = f'Monthly Distribution of {month_label}'
+    ws3['A1'].font = TITLE
+    ws3['A1'].alignment = Alignment(horizontal='left', vertical='center', wrap_text=False)
+    ws3['A1'].fill = PatternFill(fill_type=None)
+    ws3.row_dimensions[1].height = 22
 
-    # Summary row
-    ws3['A3'] = 'Total Rent after Expense'
-    ws3['A3'].font = BOLD
-    ws3['B3'] = float(ctx['net'])
-    ws3['B3'].number_format = '#,##0'
-    ws3['B3'].alignment = RIGHT
-    ws3['C3'] = '(Taka)'
-    ws3['D3'] = 'Expense per person'
-    ws3['D3'].font = BOLD
-    ws3['E3'] = 'Amount'
-    ws3['E3'].font = BOLD
-    for col in ['A', 'B', 'C', 'D', 'E']:
-        ws3[f'{col}3'].fill = LBLUE
-        ws3[f'{col}3'].border = BORDER
+    # Row 3: summary header (row 2 intentionally blank)
+    net_formula = f"={income_total_ref}-{expense_total_ref}"
+    sc(ws3, 'A3', 'Total Rent after Expense', font=HDR_FONT, fill=DIST_HD, border=BM)
+    sc(ws3, 'B3', net_formula, font=HDR_FONT, fill=DIST_HD, align=R, border=BT, fmt='#,##0')
+    # C3: (Taka) label — no left border so it reads flush with B
+    ws3['C3'].value = '(Taka)'
+    ws3['C3'].fill = DIST_HD
+    ws3['C3'].border = Border(right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+    sc(ws3, 'D3', 'Expense per person', font=HDR_FONT, fill=DIST_HD, border=BM)
+    sc(ws3, 'E3', 'Amount', font=HDR_FONT, fill=DIST_HD, border=BM)
+    ws3.row_dimensions[3].height = 15
 
+    num_owners = len(ctx['dist_rows'])
     drow = 4
     for r in ctx['dist_rows']:
-        ded_text = ', '.join(
-            f"{d.description}-{int(d.amount):,}" for d in r['deductions']
-        )
+        ded_parts = [f"{d.description}-{int(d.amount):,}" for d in r['deductions']]
+        ded_text = ', '.join(ded_parts)
         if r['total_deductions']:
             ded_text += f" = Total {int(r['total_deductions']):,}"
 
-        cell(ws3, f'A{drow}', r['owner'].name)
-        cell(ws3, f'B{drow}', float(r['gross']), align=RIGHT, num_fmt='#,##0')
-        cell(ws3, f'C{drow}', '(Taka)')
-        cell(ws3, f'D{drow}', ded_text or '')
-        cell(ws3, f'E{drow}', float(r['net']), align=RIGHT, num_fmt='#,##0')
-        ws3[f'E{drow}'].font = BOLD
-        ws3.row_dimensions[drow].height = 18
+        sc(ws3, f'A{drow}', r['owner'].name, font=BOLD, border=BM)
+        sc(ws3, f'B{drow}', f'=B3/{num_owners}', align=R, border=BT, fmt='#,##0')
+        # (Taka) label — no left border
+        ws3[f'C{drow}'].value = '(Taka)'
+        ws3[f'C{drow}'].border = Border(right=Side(style='thin'), top=Side(style='thin'), bottom=Side(style='thin'))
+        sc(ws3, f'D{drow}', ded_text or '',
+           align=Alignment(horizontal='left', vertical='top', wrap_text=True), border=BT)
+
+        if r['total_deductions']:
+            sc(ws3, f'E{drow}', float(r['net']), font=BOLD, align=R, border=BT, fmt='#,##0')
+            ws3.row_dimensions[drow].height = 31
+        else:
+            sc(ws3, f'E{drow}', f'=B{drow}', font=BOLD, align=R, border=BT, fmt='#,##0')
+            ws3.row_dimensions[drow].height = 15
         drow += 1
 
-    # Save to buffer
+    # ── save & respond ───────────────────────────────────────────────────────
     buf = io.BytesIO()
     wb.save(buf)
     buf.seek(0)
 
-    filename = f"Bari_Maintenance_{month_date.strftime('%B_%Y')}.xlsx"
+    filename = f"{month_date.strftime('%B')}_Property_House_{month_date.year}.xlsx"
     response = HttpResponse(
         buf.read(),
         content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
