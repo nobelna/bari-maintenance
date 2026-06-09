@@ -67,10 +67,15 @@
       </table>
     </div>
     <div class="panel-footer">
-      <a href="{% url 'dashboard' %}?year={{ month_date.year }}&month={{ month_date.month }}" class="btn-ghost">Cancel</a>
-      <button type="submit" class="btn-primary-solid" style="background:linear-gradient(135deg,#f43f5e,#e11d48);">
-        <i class="fas fa-floppy-disk"></i> Save Expenses
-      </button>
+      <a href="{% url 'expense_categories' %}" class="btn-ghost">
+        <i class="fas fa-tags"></i> Manage Categories
+      </a>
+      <div style="display:flex;gap:8px;margin-left:auto;">
+        <a href="{% url 'dashboard' %}?year={{ month_date.year }}&month={{ month_date.month }}" class="btn-ghost">Cancel</a>
+        <button type="submit" class="btn-primary-solid" style="background:linear-gradient(135deg,#f43f5e,#e11d48);">
+          <i class="fas fa-floppy-disk"></i> Save Expenses
+        </button>
+      </div>
     </div>
   </div>
 </form>

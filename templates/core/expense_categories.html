@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Expense Categories{% endblock %}
+{% block nav_expenses %}active{% endblock %}
+{% block page_title %}Expense Categories{% endblock %}
+
+{% block topbar_actions %}
+<a href="{% url 'expense_category_create' %}" class="btn-primary-solid">
+  <i class="fas fa-plus"></i> Add Category
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="panel">
+  <div class="panel-header danger">
+    <div class="panel-header-title"><i class="fas fa-tags"></i> Expense Categories</div>
+    <span class="panel-header-badge">{{ categories|length }} categories</span>
+  </div>
+  <div class="table-scroll">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Name</th>
+          <th>Recurring</th>
+          <th>Description</th>
+          <th style="text-align:right">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cat in categories %}
+        <tr>
+          <td>{{ cat.order }}</td>
+          <td><span style="font-weight:600;">{{ cat.name }}</span></td>
+          <td>
+            {% if cat.is_recurring %}
+              <span class="badge-green"><i class="fas fa-check"></i> Yes</span>
+            {% else %}
+              <span class="badge-grey">No</span>
+            {% endif %}
+          </td>
+          <td>{{ cat.description|default:"—" }}</td>
+          <td style="text-align:right">
+            <a href="{% url 'expense_category_edit' cat.pk %}" class="btn-ghost btn-sm" style="margin-right:6px;">
+              <i class="fas fa-pen"></i> Edit
+            </a>
+            <a href="{% url 'expense_category_delete' cat.pk %}" class="btn-danger-outline btn-sm">
+              <i class="fas fa-trash"></i>
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5">
+            <div class="empty-state"><i class="fas fa-tags"></i><p>No categories yet. Add one to get started.</p></div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="panel-footer">
+    <a href="{% url 'expenses' %}" class="btn-ghost"><i class="fas fa-arrow-left"></i> Back to Expenses</a>
+  </div>
+</div>
+{% endblock %}

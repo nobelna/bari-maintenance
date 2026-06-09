@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block nav_expenses %}active{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="panel" style="max-width:520px">
+  <div class="panel-header danger">
+    <div class="panel-header-title"><i class="fas fa-tags"></i> {{ title }}</div>
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    <div style="padding:24px;display:flex;flex-direction:column;gap:16px;">
+
+      <div>
+        <label class="form-label">Name</label>
+        {{ form.name }}
+        {% if form.name.errors %}<div class="form-error">{{ form.name.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div>
+        <label class="form-label">Display Order</label>
+        {{ form.order }}
+        {% if form.order.errors %}<div class="form-error">{{ form.order.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div>
+        <label class="form-label">Description</label>
+        {{ form.description }}
+      </div>
+
+      <div class="form-check" style="margin-top:4px;">
+        {{ form.is_recurring }}
+        <label class="form-check-label" for="{{ form.is_recurring.id_for_label }}">Recurring monthly expense</label>
+      </div>
+
+    </div>
+    <div class="panel-footer">
+      <a href="{% url 'expense_categories' %}" class="btn-ghost">Cancel</a>
+      <button type="submit" class="btn-primary-solid" style="background:linear-gradient(135deg,#f43f5e,#e11d48);">
+        <i class="fas fa-floppy-disk"></i> Save
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

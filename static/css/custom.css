@@ -505,6 +505,22 @@ body {
   border-radius: 4px;
   font-weight: 500;
 }
+.badge-green {
+  background: #dcfce7;
+  color: #15803d;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+.badge-grey {
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 500;
+}
 
 /* ── Buttons ──────────────────────────────────────────────── */
 .btn-primary-solid {
@@ -570,6 +586,30 @@ body {
   background: #f8fafc;
   color: #334155;
   border-color: #cbd5e1;
+}
+.btn-danger-outline {
+  background: transparent;
+  color: #e11d48;
+  border: 1px solid #fecdd3;
+  border-radius: 8px;
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+.btn-danger-outline:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #be123c;
+}
+.btn-sm {
+  padding: 5px 12px;
+  font-size: 12px;
 }
 .btn-icon-sm {
   background: none;

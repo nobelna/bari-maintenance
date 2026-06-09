@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Delete Category{% endblock %}
+{% block nav_expenses %}active{% endblock %}
+{% block page_title %}Delete Category{% endblock %}
+
+{% block content %}
+<div class="panel" style="max-width:480px">
+  <div class="panel-header danger">
+    <div class="panel-header-title"><i class="fas fa-trash"></i> Delete Category</div>
+  </div>
+  <div style="padding:24px;">
+    <p>Are you sure you want to delete <strong>{{ category.name }}</strong>?</p>
+    <p style="color:#e11d48;font-size:13px;">
+      <i class="fas fa-circle-exclamation"></i>
+      This will also delete all monthly expense records for this category.
+    </p>
+  </div>
+  <div class="panel-footer">
+    <a href="{% url 'expense_categories' %}" class="btn-ghost">Cancel</a>
+    <form method="post" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="btn-primary-solid" style="background:linear-gradient(135deg,#f43f5e,#e11d48);">
+        <i class="fas fa-trash"></i> Yes, Delete
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

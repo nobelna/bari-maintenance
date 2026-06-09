@@ -1,5 +1,5 @@
 from django import forms
-from .models import Unit, OwnerDeduction, Owner
+from .models import Unit, OwnerDeduction, Owner, ExpenseCategory
 
 
 class UnitForm(forms.ModelForm):
@@ -24,4 +24,16 @@ class OwnerDeductionForm(forms.ModelForm):
             'month': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'description': forms.TextInput(attrs={'class': 'form-control'}),
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+        }
+
+
+class ExpenseCategoryForm(forms.ModelForm):
+    class Meta:
+        model = ExpenseCategory
+        fields = ['name', 'is_recurring', 'description', 'order']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'order': forms.NumberInput(attrs={'class': 'form-control'}),
+            'is_recurring': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }

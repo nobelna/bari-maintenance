@@ -9,7 +9,7 @@ from django.db.models import Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import OwnerDeductionForm, UnitForm
+from .forms import ExpenseCategoryForm, OwnerDeductionForm, UnitForm
 from .models import (
     Distribution, ExpenseCategory, MonthlyExpense, Owner,
     OwnerDeduction, RentalIncome, Unit,
@@ -316,6 +316,53 @@ def deduction_delete(request, pk):
         ded.delete()
         messages.success(request, 'Deduction removed.')
     return redirect(f'/distribution/?year={month.year}&month={month.month}')
+
+
+# ─── expense categories ───────────────────────────────────────────────────────
+
+@login_required
+def expense_categories(request):
+    cats = ExpenseCategory.objects.all()
+    return render(request, 'core/expense_categories.html', {'categories': cats})
+
+
+@login_required
+def expense_category_create(request):
+    if request.method == 'POST':
+        form = ExpenseCategoryForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Category added.')
+            return redirect('expense_categories')
+    else:
+        form = ExpenseCategoryForm()
+    return render(request, 'core/expense_category_form.html', {'form': form, 'title': 'Add Expense Category'})
+
+
+@login_required
+def expense_category_edit(request, pk):
+    cat = get_object_or_404(ExpenseCategory, pk=pk)
+    if request.method == 'POST':
+        form = ExpenseCategoryForm(request.POST, instance=cat)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Category updated.')
+            return redirect('expense_categories')
+    else:
+        form = ExpenseCategoryForm(instance=cat)
+    return render(request, 'core/expense_category_form.html', {
+        'form': form, 'title': 'Edit Category', 'category': cat,
+    })
+
+
+@login_required
+def expense_category_delete(request, pk):
+    cat = get_object_or_404(ExpenseCategory, pk=pk)
+    if request.method == 'POST':
+        cat.delete()
+        messages.success(request, 'Category deleted.')
+        return redirect('expense_categories')
+    return render(request, 'core/expense_category_confirm_delete.html', {'category': cat})
 
 
 # ─── units ───────────────────────────────────────────────────────────────────
